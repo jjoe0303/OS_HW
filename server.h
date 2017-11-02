@@ -7,6 +7,11 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <string.h>
+#include <dirent.h>
+#include <unistd.h>
+#include <ctype.h>
 
 void openFile(FILE *fin,char pid[],char buffer[]);
+void listAll();
+
 #endif

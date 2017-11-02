@@ -9,7 +9,8 @@ int main(int argc, char **argv)
 	while(1) {
 		printf("pid?");
 		scanf("%s",&pid);
-		openFile(fin,pid,buffer);
+		//openFile(fin,pid,buffer);
+		listAll();
 	}
 	return 0;
 }
@@ -31,4 +32,31 @@ void openFile(FILE *fin, char pid[],char buffer[])
 	}
 	fclose(fin);
 }
+
+void listAll()
+{
+	DIR * dir = opendir("/proc");
+	struct dirent *pidname;
+	char base[1000];
+	memset(base,'\0',sizeof(base));
+	if((dir=opendir("/proc")) == NULL) {
+		perror("Open dir error...");
+		exit(1);
+	}
+
+	while((pidname=readdir(dir)) != NULL) {
+		if(strcmp(pidname->d_name,".")==0 || strcmp(pidname->d_name,"..")==0)
+			continue;
+		else if(pidname->d_type == 4 && isdigit(pidname->d_name[0])) {
+			//memset(base,'\0',sizeof(base));
+			strcat(base,pidname->d_name);
+			strcat(base,",");
+			// printf("%s\n",base);
+		}
+	}
+	printf("%s\n",base);
+	closedir(dir);
+	return;
+}
+
 
