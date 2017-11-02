@@ -28,25 +28,26 @@ int main(int argc, char **argv)
 
 	serverinfo.sin_family = PF_INET;
 	serverinfo.sin_addr.s_addr = INADDR_ANY;
-	serverinfo.sin_port = htons(8700);
+	serverinfo.sin_port = htons(59487);
 	bind(sockfd,(struct sockaddr *)&serverinfo,sizeof(serverinfo));
 	listen(sockfd,5);
 
 	while(1) {
 		forClientSockfd = accept(sockfd,(struct sockaddr *)&clientinfo,&addrlen);
-		send(forClientSockfd,message,sizeof(message),0);
+		//send(forClientSockfd,message,sizeof(message),0);
 		recv(forClientSockfd,inputBuffer,sizeof(inputBuffer),0);
-		printf("Get: %s\n",inputBuffer);
+		printf("Get:%s\n",inputBuffer);
+		//listAll(base);
+		//printf("%s\n",base);
+		if(strcmp(inputBuffer,"a") == 0) {
+			listAll(base);
+			//       printf("%s\n",base);
+			send(forClientSockfd,base,sizeof(base),0);
+		}
 	}
 
 
 
-	/*while(1) {
-		printf("pid?");
-		scanf("%s",&pid);
-		//openFile(fin,pid,buffer);
-		listAll();
-	}*/
 	return 0;
 }
 
@@ -89,7 +90,7 @@ void listAll(char *base[])
 			// printf("%s\n",base);
 		}
 	}
-	printf("%s\n",base);
+//	printf("%s\n",base);
 	closedir(dir);
 	return;
 }
