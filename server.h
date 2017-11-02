@@ -10,6 +10,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <netinet/in.h>
 
 void openFile(FILE *fin,char pid[],char buffer[]);
 void listAll();

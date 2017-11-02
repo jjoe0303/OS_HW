@@ -6,12 +6,47 @@ int main(int argc, char **argv)
 	FILE *fin;
 	char buffer[100];
 	char pid[50];
+	char base[1000];
+
+	//create a socket
+	char inputBuffer[1000]= {};
+	char message[] = {"Hi!this is server.\n"};
+	int sockfd = 0,forClientSockfd=0;
+	sockfd = socket(AF_INET,SOCK_STREAM,0);
+
+	if(sockfd == -1) {
+		printf("Fail to create a socket...");
+	}
+
+	else {
+		printf("Socket created\n");
+	}
+	//socket link
+	struct sockaddr_in serverinfo,clientinfo;
+	int addrlen = sizeof(clientinfo);
+	bzero(&serverinfo,sizeof(serverinfo));
+
+	serverinfo.sin_family = PF_INET;
+	serverinfo.sin_addr.s_addr = INADDR_ANY;
+	serverinfo.sin_port = htons(8700);
+	bind(sockfd,(struct sockaddr *)&serverinfo,sizeof(serverinfo));
+	listen(sockfd,5);
+
 	while(1) {
+		forClientSockfd = accept(sockfd,(struct sockaddr *)&clientinfo,&addrlen);
+		send(forClientSockfd,message,sizeof(message),0);
+		recv(forClientSockfd,inputBuffer,sizeof(inputBuffer),0);
+		printf("Get: %s\n",inputBuffer);
+	}
+
+
+
+	/*while(1) {
 		printf("pid?");
 		scanf("%s",&pid);
 		//openFile(fin,pid,buffer);
 		listAll();
-	}
+	}*/
 	return 0;
 }
 
@@ -33,11 +68,11 @@ void openFile(FILE *fin, char pid[],char buffer[])
 	fclose(fin);
 }
 
-void listAll()
+void listAll(char *base[])
 {
 	DIR * dir = opendir("/proc");
 	struct dirent *pidname;
-	char base[1000];
+	//char base[1000];
 	memset(base,'\0',sizeof(base));
 	if((dir=opendir("/proc")) == NULL) {
 		perror("Open dir error...");
