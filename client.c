@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 		/****************************
 		  User Interface
 		 ****************************/
-		printf("\n======================================================");
+		printf("======================================================");
 		printf("\n(a)list all process ids\n");
 		printf("(b)thread's IDs\n");
 		printf("(c)child's PIDs\n");
@@ -74,7 +74,7 @@ int main(int argc, char **argv)
 			send(sockfd,message,sizeof(message),0);
 			recv(sockfd,receivefromServer,sizeof(receivefromServer),0);
 			//printf("haha\n");
-			printf("[process name] %s",receivefromServer);
+			printf("[process name] %s\n",receivefromServer);
 			close(sockfd);
 		}
 
@@ -86,13 +86,47 @@ int main(int argc, char **argv)
 			strcat(message,pid);
 			send(sockfd,message,sizeof(message),0);
 			recv(sockfd,receivefromServer,sizeof(receivefromServer),0);
-			//printf("haha\n");
-			printf("[State of process] %s",receivefromServer);
+			printf("[State of process] %s\n",receivefromServer);
+			close(sockfd);
+		}
+
+		else if(work == 'g') {
+			printf("pid?");
+			char pid[256];
+			sprintf(message,"%c",work);
+			gets(pid);
+			strcat(message,pid);
+			send(sockfd,message,sizeof(message),0);
+			recv(sockfd,receivefromServer,sizeof(receivefromServer),0);
+			printf("[parent's PID] %s\n",receivefromServer);
 			close(sockfd);
 		}
 
 
-		else if(work == 'k') {
+		else if(work == 'i') {
+			printf("pid?");
+			char pid[256];
+			sprintf(message,"%c",work);
+			gets(pid);
+			strcat(message,pid);
+			send(sockfd,message,sizeof(message),0);
+			recv(sockfd,receivefromServer,sizeof(receivefromServer),0);
+			printf("[virtual memory] %s\n",receivefromServer);
+			close(sockfd);
+		}
+
+		else if(work == 'j') {
+			printf("pid?");
+			char pid[256];
+			sprintf(message,"%c",work);
+			gets(pid);
+			strcat(message,pid);
+			send(sockfd,message,sizeof(message),0);
+			recv(sockfd,receivefromServer,sizeof(receivefromServer),0);
+			printf("[physical memory] %s\n",receivefromServer);
+			close(sockfd);
+
+		} else if(work == 'k') {
 			EXIT = 1;
 		}
 	}

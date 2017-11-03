@@ -68,6 +68,27 @@ int main(int argc, char **argv)
 			printf("value=%s\n",value);
 			send(forClientSockfd,value,sizeof(value),0);
 		}
+
+		else if(inputBuffer[0] == 'g') {
+			getPid(pid,inputBuffer);
+			openFile(fin,pid,buffer,inputBuffer[0],value);
+			printf("value=%s\n",value);
+			send(forClientSockfd,value,sizeof(value),0);
+		}
+
+		else if(inputBuffer[0] == 'i') {
+			getPid(pid,inputBuffer);
+			openFile(fin,pid,buffer,inputBuffer[0],value);
+			printf("value=%s\n",value);
+			send(forClientSockfd,value,sizeof(value),0);
+		}
+
+		else if(inputBuffer[0] == 'j') {
+			getPid(pid,inputBuffer);
+			openFile(fin,pid,buffer,inputBuffer[0],value);
+			printf("value=%s\n",value);
+			send(forClientSockfd,value,sizeof(value),0);
+		}
 	}
 
 
@@ -99,15 +120,15 @@ void scanString(char buffer[],char value[])
 	int i,j=0;
 	int isValue = 0;
 	for(i=0; i<strlen(buffer); ++i) {
-		printf("buffer[%d]=%c\n",i,buffer[i]);
+		//printf("buffer[%d]=%c\n",i,buffer[i]);
 		if(buffer[i]=='\n') break;
 		if(buffer[i]==':' && isValue == 0) {
 			isValue=1;
 			continue;
 		}
-		if(isValue && buffer[i]!=' ') {
+		if(isValue && buffer[i]!=' ' && buffer[i]!='\t' && buffer[i]!='\0') {
 			value[j]=buffer[i];
-			printf("value[%d]=%c\n",j,value[j]);
+			//printf("value[%d]=%c\n",j,value[j]);
 			j++;
 		}
 
@@ -124,19 +145,41 @@ void openFile(FILE *fin, char pid[],char buffer[],char work,char value[])
 	strcat(address,"/proc/");
 	strcat(address,pid);
 	strcat(address,"/status");
+	int isFind = 0;
 	//printf("%s\n",address);
 	/*open file*/
 	fin = fopen(address,"r");
 	while(fgets(buffer,40,fin)!= NULL) {
+		memset(value,'\0',sizeof(value));
 		if(buffer[0]=='N' && buffer[1]=='a' && buffer[2]=='m' && buffer[3]=='e'
 		   && work =='d') {
 			scanString(buffer,value);
+			isFind=1;
 			break;
 		} else if(buffer[0]=='S' && buffer[1]=='t' && buffer[2]=='a' && buffer[3]=='t'
 		          && buffer[4]=='e' && work=='e') {
 			scanString(buffer,value);
+			isFind=1;
+			break;
+		} else if(buffer[0]=='P' && buffer[1]=='P' && buffer[2]=='i' && buffer[3]=='d'
+		          && work=='g') {
+			scanString(buffer,value);
+			isFind=1;
+			break;
+		} else if(buffer[0]=='V' && buffer[1]=='m' && buffer[2]=='S' && buffer[3]=='i'
+		          &&buffer[4]=='z' && buffer[5]=='e'&& work=='i') {
+			scanString(buffer,value);
+			isFind=1;
+			break;
+		} else if(buffer[0]=='V' && buffer[1]=='m' && buffer[2]=='R' && buffer[3]=='S'
+		          &&buffer[4]=='S' && work=='j') {
+			scanString(buffer,value);
+			isFind=1;
 			break;
 		}
+	}
+	if(!isFind) {
+		strcpy(value,"Not found!!");
 	}
 	fclose(fin);
 }
