@@ -78,6 +78,20 @@ int main(int argc, char **argv)
 			close(sockfd);
 		}
 
+		else if(work == 'e') {
+			printf("pid?");
+			char pid[256];
+			sprintf(message,"%c",work);
+			gets(pid);
+			strcat(message,pid);
+			send(sockfd,message,sizeof(message),0);
+			recv(sockfd,receivefromServer,sizeof(receivefromServer),0);
+			//printf("haha\n");
+			printf("[State of process] %s",receivefromServer);
+			close(sockfd);
+		}
+
+
 		else if(work == 'k') {
 			EXIT = 1;
 		}

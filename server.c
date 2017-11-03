@@ -61,6 +61,13 @@ int main(int argc, char **argv)
 			printf("value=%s\n",value);
 			send(forClientSockfd,value,sizeof(value),0);
 		}
+
+		else if(inputBuffer[0] == 'e') {
+			getPid(pid,inputBuffer);
+			openFile(fin,pid,buffer,inputBuffer[0],value);
+			printf("value=%s\n",value);
+			send(forClientSockfd,value,sizeof(value),0);
+		}
 	}
 
 
@@ -121,14 +128,13 @@ void openFile(FILE *fin, char pid[],char buffer[],char work,char value[])
 	/*open file*/
 	fin = fopen(address,"r");
 	while(fgets(buffer,40,fin)!= NULL) {
-
-		//        fflush(stdin);
-		//        printf("buffer[0]=%c\n",buffer[0]);
 		if(buffer[0]=='N' && buffer[1]=='a' && buffer[2]=='m' && buffer[3]=='e'
 		   && work =='d') {
-			//printf("%s",buffer);
 			scanString(buffer,value);
-			//strcpy(buffer,scanString(buffer));
+			break;
+		} else if(buffer[0]=='S' && buffer[1]=='t' && buffer[2]=='a' && buffer[3]=='t'
+		          && buffer[4]=='e' && work=='e') {
+			scanString(buffer,value);
 			break;
 		}
 	}
