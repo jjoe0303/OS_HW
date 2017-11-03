@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 		/****************************
 		  User Interface
 		 ****************************/
-		printf("======================================================");
+		printf("\n======================================================");
 		printf("\n(a)list all process ids\n");
 		printf("(b)thread's IDs\n");
 		printf("(c)child's PIDs\n");
@@ -73,7 +73,8 @@ int main(int argc, char **argv)
 			strcat(message,pid);
 			send(sockfd,message,sizeof(message),0);
 			recv(sockfd,receivefromServer,sizeof(receivefromServer),0);
-			printf("[process name] %s\n",receivefromServer);
+			//printf("haha\n");
+			printf("[process name] %s",receivefromServer);
 			close(sockfd);
 		}
 

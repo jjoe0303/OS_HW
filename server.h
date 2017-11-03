@@ -12,10 +12,11 @@
 #include <ctype.h>
 #include <netinet/in.h>
 
-void getPid(char *pid[],char inputBuffer[]);
-char scanString(char buffer[]);
+//void cleanValue(char value[]);
+void getPid(char pid[],char inputBuffer[]);
+void scanString(char buffer[],char value[]);
 //void openFile(FILE *fin,char pid[],char buffer[]);
-void openFile(FILE *fin,char pid[],char buffer[],char work);
-void listAll();
+void openFile(FILE *fin,char pid[],char buffer[],char work,char value[]);
+void listAll(char base[]);
 
 #endif

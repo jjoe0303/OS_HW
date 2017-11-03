@@ -5,12 +5,12 @@ int main(int argc, char **argv)
 	// write someting here...
 	FILE *fin;
 	char buffer[100];
+	char value[100];
 	char pid[50];
 	char base[1000];
 
 	//create a socket
 	char inputBuffer[1000]= {};
-	char message[] = {"Hi!this is server.\n"};
 	int sockfd = 0,forClientSockfd=0;
 	sockfd = socket(AF_INET,SOCK_STREAM,0);
 
@@ -33,10 +33,18 @@ int main(int argc, char **argv)
 	listen(sockfd,5);
 
 	while(1) {
+		/*mem initialize*/
+		memset(inputBuffer,'\0',sizeof(inputBuffer));
+		memset(buffer,'\0',sizeof(buffer));
+		memset(value,'\0',sizeof(value));
+		memset(pid,'\0',sizeof(pid));
+		memset(base,'\0',sizeof(base));
+
 		forClientSockfd = accept(sockfd,(struct sockaddr *)&clientinfo,&addrlen);
 		//send(forClientSockfd,message,sizeof(message),0);
 		recv(forClientSockfd,inputBuffer,sizeof(inputBuffer),0);
 		printf("Get:%s\n",inputBuffer);
+
 		//listAll(base);
 		//printf("%s\n",base);
 		if(strcmp(inputBuffer,"a") == 0) {
@@ -48,8 +56,10 @@ int main(int argc, char **argv)
 		else if(inputBuffer[0] == 'd') {
 			getPid(pid,inputBuffer);
 			//printf("%s\n",pid);
-			openFile(fin,pid,buffer,inputBuffer[0]);
-			send(forClientSockfd,buffer,sizeof(buffer),0);
+			//cleanValue(value);
+			openFile(fin,pid,buffer,inputBuffer[0],value);
+			printf("value=%s\n",value);
+			send(forClientSockfd,value,sizeof(value),0);
 		}
 	}
 
@@ -58,11 +68,12 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-void getPid(char * pid[],char inputBuffer[])
+
+void getPid(char  pid[],char inputBuffer[])
 {
 	int i;
 	char array[50];
-	memset(pid,'\0',sizeof(pid));
+	//memset(pid,'\0',sizeof(pid));
 	memset(array,'\0',sizeof(array));
 	//printf("buffersize=%d\n",sizeof(inputBuffer));
 	for(i=0; i<sizeof(inputBuffer); ++i) {
@@ -76,28 +87,31 @@ void getPid(char * pid[],char inputBuffer[])
 	return;
 }
 
-char scanString(char buffer[])
+void scanString(char buffer[],char value[])
 {
 	int i,j=0;
-	char value[1000];
 	int isValue = 0;
-	for(i=0; i<sizeof(buffer); ++i) {
-		if(buffer[i]==':') {
-			printf("haha");
+	for(i=0; i<strlen(buffer); ++i) {
+		printf("buffer[%d]=%c\n",i,buffer[i]);
+		if(buffer[i]=='\n') break;
+		if(buffer[i]==':' && isValue == 0) {
 			isValue=1;
 			continue;
 		}
-		if(isValue && buffer[i]!='\0') {
+		if(isValue && buffer[i]!=' ') {
 			value[j]=buffer[i];
+			printf("value[%d]=%c\n",j,value[j]);
 			j++;
 		}
+
 	}
-	return value;
+	return;
 }
 
-void openFile(FILE *fin, char pid[],char buffer[],char work)
+void openFile(FILE *fin, char pid[],char buffer[],char work,char value[])
 {
-	memset(buffer,'\0',sizeof(buffer));
+	//memset(buffer,'\0',sizeof(buffer));
+	//memset(value,'\0',sizeof(value));
 	/*concat the address*/
 	char address[70]="";
 	strcat(address,"/proc/");
@@ -112,8 +126,9 @@ void openFile(FILE *fin, char pid[],char buffer[],char work)
 		//        printf("buffer[0]=%c\n",buffer[0]);
 		if(buffer[0]=='N' && buffer[1]=='a' && buffer[2]=='m' && buffer[3]=='e'
 		   && work =='d') {
-			printf("%s",buffer);
-			strcpy(buffer,scanString(buffer));
+			//printf("%s",buffer);
+			scanString(buffer,value);
+			//strcpy(buffer,scanString(buffer));
 			break;
 		}
 	}
@@ -123,12 +138,12 @@ void openFile(FILE *fin, char pid[],char buffer[],char work)
 
 
 
-void listAll(char *base[])
+void listAll(char base[])
 {
 	DIR * dir = opendir("/proc");
 	struct dirent *pidname;
 	//char base[1000];
-	memset(base,'\0',sizeof(base));
+	//memset(base,'\0',sizeof(base));
 	if((dir=opendir("/proc")) == NULL) {
 		perror("Open dir error...");
 		exit(1);
