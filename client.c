@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 		//send a message
 		char message[1000];
 		char receivefromServer[1000] = {};
-
+		memset(message,'\0',sizeof(message));
 		/****************************
 		  User Interface
 		 ****************************/
@@ -55,7 +55,7 @@ int main(int argc, char **argv)
 		scanf("%c",&work);
 		getchar();
 		if(work == 'a') {
-			memset(message,'\0',sizeof(message));
+			//memset(message,'\0',sizeof(message));
 			//strcat(message,"a");
 			sprintf(message,"%c",work);
 			//printf("%s\n",message);
@@ -65,7 +65,19 @@ int main(int argc, char **argv)
 			close(sockfd);
 		}
 
-		if(work == 'k') {
+		else if(work == 'd') {
+			printf("pid?");
+			char pid[256];
+			sprintf(message,"%c",work);
+			gets(pid);
+			strcat(message,pid);
+			send(sockfd,message,sizeof(message),0);
+			recv(sockfd,receivefromServer,sizeof(receivefromServer),0);
+			printf("[process name] %s\n",receivefromServer);
+			close(sockfd);
+		}
+
+		else if(work == 'k') {
 			EXIT = 1;
 		}
 	}

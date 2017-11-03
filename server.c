@@ -2,7 +2,7 @@
 
 int main(int argc, char **argv)
 {
-// write someting here...
+	// write someting here...
 	FILE *fin;
 	char buffer[100];
 	char pid[50];
@@ -44,6 +44,13 @@ int main(int argc, char **argv)
 			//       printf("%s\n",base);
 			send(forClientSockfd,base,sizeof(base),0);
 		}
+
+		else if(inputBuffer[0] == 'd') {
+			getPid(pid,inputBuffer);
+			//printf("%s\n",pid);
+			openFile(fin,pid,buffer,inputBuffer[0]);
+			send(forClientSockfd,buffer,sizeof(buffer),0);
+		}
 	}
 
 
@@ -51,8 +58,46 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-void openFile(FILE *fin, char pid[],char buffer[])
+void getPid(char * pid[],char inputBuffer[])
 {
+	int i;
+	char array[50];
+	memset(pid,'\0',sizeof(pid));
+	memset(array,'\0',sizeof(array));
+	//printf("buffersize=%d\n",sizeof(inputBuffer));
+	for(i=0; i<sizeof(inputBuffer); ++i) {
+		if(inputBuffer[i+1]=='\0') break;
+		array[i]=inputBuffer[i+1];
+		sprintf(pid,"%s%c",pid,array[i]);
+		//strcat(pid,pid[i]);
+		//printf("pid[%d]=%c , pid = %s \n",i,array[i],pid);
+	}
+
+	return;
+}
+
+char scanString(char buffer[])
+{
+	int i,j=0;
+	char value[1000];
+	int isValue = 0;
+	for(i=0; i<sizeof(buffer); ++i) {
+		if(buffer[i]==':') {
+			printf("haha");
+			isValue=1;
+			continue;
+		}
+		if(isValue && buffer[i]!='\0') {
+			value[j]=buffer[i];
+			j++;
+		}
+	}
+	return value;
+}
+
+void openFile(FILE *fin, char pid[],char buffer[],char work)
+{
+	memset(buffer,'\0',sizeof(buffer));
 	/*concat the address*/
 	char address[70]="";
 	strcat(address,"/proc/");
@@ -61,13 +106,22 @@ void openFile(FILE *fin, char pid[],char buffer[])
 	//printf("%s\n",address);
 	/*open file*/
 	fin = fopen(address,"r");
-	while(fgets(buffer,100,fin)!= NULL) {
-		if(buffer[0]=='P' && buffer[1]=='i' && buffer[2]=='d') {
+	while(fgets(buffer,40,fin)!= NULL) {
+
+		//        fflush(stdin);
+		//        printf("buffer[0]=%c\n",buffer[0]);
+		if(buffer[0]=='N' && buffer[1]=='a' && buffer[2]=='m' && buffer[3]=='e'
+		   && work =='d') {
 			printf("%s",buffer);
+			strcpy(buffer,scanString(buffer));
+			break;
 		}
 	}
 	fclose(fin);
 }
+
+
+
 
 void listAll(char *base[])
 {
@@ -90,7 +144,7 @@ void listAll(char *base[])
 			// printf("%s\n",base);
 		}
 	}
-//	printf("%s\n",base);
+	//	printf("%s\n",base);
 	closedir(dir);
 	return;
 }
