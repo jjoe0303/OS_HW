@@ -22,6 +22,7 @@ void findAncient(FILE *fin,char pid[],char buffer[],char work,char value[],
 void openFile(FILE *fin,char pid[],char buffer[],char work,char value[]);
 void findChild(FILE *fin,char pid[],char buffer[],char work,char value[],
                char base[]);
+void listTid(char base[],char pid[]);
 void listAll(char base[]);
 void *pthread_handler(void *);
 

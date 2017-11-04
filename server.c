@@ -218,6 +218,45 @@ void findChild(FILE *fin, char pid[],char buffer[],char work,char value[],
 
 }
 
+void listTid(char base[],char pid[])
+{
+	/*concat address*/
+	char address[256]="/proc/";
+	sprintf(address,"%s%s%s",address,pid,"/task");
+	printf("address:%s\n",address);
+
+	/*open directory*/
+	DIR * dir = opendir(address);
+	struct dirent *pidname;
+	//char base[1000];
+	//memset(base,'\0',sizeof(base));
+	if((dir=opendir(address)) == NULL) {
+		perror("Open dir error...");
+		exit(1);
+	}
+
+	int nonFirst=0;
+	while((pidname=readdir(dir)) != NULL) {
+		if(strcmp(pidname->d_name,".")==0 || strcmp(pidname->d_name,"..")==0)
+			continue;
+		else if(pidname->d_type == 4 && isdigit(pidname->d_name[0])) {
+			//memset(base,'\0',sizeof(base));
+			if(!nonFirst) {
+				sprintf(base,"%s",pidname->d_name);
+				nonFirst=1;
+			}
+
+			else {
+				sprintf(base,"%s,%s",base,pidname->d_name);
+			}
+			// printf("%s\n",base);
+		}
+	}
+	//	printf("%s\n",base);
+	closedir(dir);
+	return;
+}
+
 void listAll(char base[])
 {
 	DIR * dir = opendir("/proc");
@@ -229,13 +268,21 @@ void listAll(char base[])
 		exit(1);
 	}
 
+	int nonFirst=0;
 	while((pidname=readdir(dir)) != NULL) {
 		if(strcmp(pidname->d_name,".")==0 || strcmp(pidname->d_name,"..")==0)
 			continue;
 		else if(pidname->d_type == 4 && isdigit(pidname->d_name[0])) {
+			if(!nonFirst) {
+				sprintf(base,"%s",pidname->d_name);
+				nonFirst=1;
+			} else {
+				sprintf(base,"%s,%s",base,pidname->d_name);
+			}
+
 			//memset(base,'\0',sizeof(base));
-			strcat(base,pidname->d_name);
-			strcat(base,",");
+			//strcat(base,pidname->d_name);
+			//strcat(base,",");
 			// printf("%s\n",base);
 		}
 	}
@@ -276,9 +323,10 @@ void *pthread_handler(void *sockfd)
 	}
 
 	else if(inputBuffer[0] == 'b') {
-		sprintf(value,"%lu",pthread_self());
-		printf("value=%s\n",value);
-		send(sock,value,sizeof(value),0);
+		getPid(pid,inputBuffer);
+		listTid(base,pid);
+		printf("value=%s\n",base);
+		send(sock,base,sizeof(base),0);
 	}
 
 	else if(inputBuffer[0] == 'c') {

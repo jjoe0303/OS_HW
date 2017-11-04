@@ -66,10 +66,14 @@ int main(int argc, char **argv)
 		}
 
 		else if(work == 'b') {
+			printf("pid?");
+			char pid[256];
 			sprintf(message,"%c",work);
+			gets(pid);
+			strcat(message,pid);
 			send(sockfd,message,sizeof(message),0);
 			recv(sockfd,receivefromServer,sizeof(receivefromServer),0);
-			printf("[Thread's id] %s\n",receivefromServer);
+			printf("[Thread's ID] %s\n",receivefromServer);
 			close(sockfd);
 		}
 
