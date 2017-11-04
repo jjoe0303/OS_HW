@@ -214,8 +214,13 @@ void *pthread_handler(void *sockfd)
 	//printf("%s\n",base);
 	if(strcmp(inputBuffer,"a") == 0) {
 		listAll(base);
-		//       printf("%s\n",base);
-		send(sock,base,sizeof(base),0);
+		send(sock,base,sizeof(base)-1,0);
+	}
+
+	else if(inputBuffer[0] == 'b') {
+		sprintf(value,"%lu",pthread_self());
+		printf("value=%s\n",value);
+		send(sock,value,sizeof(value),0);
 	}
 
 	else if(inputBuffer[0] == 'd') {
