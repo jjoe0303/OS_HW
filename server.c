@@ -2,15 +2,15 @@
 
 int main(int argc, char **argv)
 {
-	// write someting here...
-	FILE *fin;
-	char buffer[100];
-	char value[100];
-	char pid[50];
-	char base[1000];
+	//	//declare variable
+	//	FILE *fin;
+	//	char buffer[100];
+	//	char value[100];
+	//	char pid[50];
+	//	char base[1000];
 
 	//create a socket
-	char inputBuffer[1000]= {};
+	//char inputBuffer[1000]= {};
 	int sockfd = 0,forClientSockfd=0;
 	sockfd = socket(AF_INET,SOCK_STREAM,0);
 
@@ -29,69 +29,35 @@ int main(int argc, char **argv)
 	serverinfo.sin_family = PF_INET;
 	serverinfo.sin_addr.s_addr = INADDR_ANY;
 	serverinfo.sin_port = htons(59487);
-	bind(sockfd,(struct sockaddr *)&serverinfo,sizeof(serverinfo));
-	listen(sockfd,5);
 
-	while(1) {
-		/*mem initialize*/
-		memset(inputBuffer,'\0',sizeof(inputBuffer));
-		memset(buffer,'\0',sizeof(buffer));
-		memset(value,'\0',sizeof(value));
-		memset(pid,'\0',sizeof(pid));
-		memset(base,'\0',sizeof(base));
-
-		forClientSockfd = accept(sockfd,(struct sockaddr *)&clientinfo,&addrlen);
-		//send(forClientSockfd,message,sizeof(message),0);
-		recv(forClientSockfd,inputBuffer,sizeof(inputBuffer),0);
-		printf("Get:%s\n",inputBuffer);
-
-		//listAll(base);
-		//printf("%s\n",base);
-		if(strcmp(inputBuffer,"a") == 0) {
-			listAll(base);
-			//       printf("%s\n",base);
-			send(forClientSockfd,base,sizeof(base),0);
-		}
-
-		else if(inputBuffer[0] == 'd') {
-			getPid(pid,inputBuffer);
-			//printf("%s\n",pid);
-			//cleanValue(value);
-			openFile(fin,pid,buffer,inputBuffer[0],value);
-			printf("value=%s\n",value);
-			send(forClientSockfd,value,sizeof(value),0);
-		}
-
-		else if(inputBuffer[0] == 'e') {
-			getPid(pid,inputBuffer);
-			openFile(fin,pid,buffer,inputBuffer[0],value);
-			printf("value=%s\n",value);
-			send(forClientSockfd,value,sizeof(value),0);
-		}
-
-		else if(inputBuffer[0] == 'g') {
-			getPid(pid,inputBuffer);
-			openFile(fin,pid,buffer,inputBuffer[0],value);
-			printf("value=%s\n",value);
-			send(forClientSockfd,value,sizeof(value),0);
-		}
-
-		else if(inputBuffer[0] == 'i') {
-			getPid(pid,inputBuffer);
-			openFile(fin,pid,buffer,inputBuffer[0],value);
-			printf("value=%s\n",value);
-			send(forClientSockfd,value,sizeof(value),0);
-		}
-
-		else if(inputBuffer[0] == 'j') {
-			getPid(pid,inputBuffer);
-			openFile(fin,pid,buffer,inputBuffer[0],value);
-			printf("value=%s\n",value);
-			send(forClientSockfd,value,sizeof(value),0);
-		}
+	//Bind()
+	if(bind(sockfd,(struct sockaddr *)&serverinfo,sizeof(serverinfo)) < 0) {
+		perror("Bind failed\n");
+		return 1;
+	} else {
+		printf("Bind Done!\n");
 	}
 
+	//Listen()
+	listen(sockfd,100);
 
+	printf("Waiting for connections...\n");
+	pthread_t thread_id;
+	while((forClientSockfd = accept(sockfd,(struct sockaddr *)&clientinfo,
+	                                &addrlen))) {
+		printf("Connection Accept...\n");
+		if(pthread_create(&thread_id,NULL,pthread_handler,
+		                  (void *)&forClientSockfd) < 0) {
+			perror("Couldn't create thread...\n");
+			return 1;
+		}
+		printf("Handler assigned~\n");
+	}
+
+	if(forClientSockfd < 0) {
+		perror("accept failed!\n");
+		return 1;
+	}
 
 	return 0;
 }
@@ -136,10 +102,19 @@ void scanString(char buffer[],char value[])
 	return;
 }
 
+void getCmdline(FILE *fin,char value[])
+{
+	memset(value,'\0',sizeof(value));
+	fin = fopen("/proc/self/cmdline","r");
+	fgets(value,100,fin);
+
+	return;
+}
+
 void openFile(FILE *fin, char pid[],char buffer[],char work,char value[])
 {
-	//memset(buffer,'\0',sizeof(buffer));
-	//memset(value,'\0',sizeof(value));
+	memset(buffer,'\0',sizeof(buffer));
+	memset(value,'\0',sizeof(value));
 	/*concat the address*/
 	char address[70]="";
 	strcat(address,"/proc/");
@@ -213,4 +188,77 @@ void listAll(char base[])
 	return;
 }
 
+void *pthread_handler(void *sockfd)
+{
+	int sock = *(int*)sockfd;
+	FILE *fin;
+	char buffer[100];
+	char value[100];
+	char pid[50];
+	char base[1000];
+	char inputBuffer[1000]= {};
 
+	/*mem initialize*/
+	memset(inputBuffer,'\0',sizeof(inputBuffer));
+	memset(buffer,'\0',sizeof(buffer));
+	memset(value,'\0',sizeof(value));
+	memset(pid,'\0',sizeof(pid));
+	memset(base,'\0',sizeof(base));
+
+	//forClientSockfd = accept(sockfd,(struct sockaddr *)&clientinfo,&addrlen);
+	//send(forClientSockfd,message,sizeof(message),0);
+	recv(sock,inputBuffer,sizeof(inputBuffer),0);
+	printf("Get:%s\n",inputBuffer);
+
+	//listAll(base);
+	//printf("%s\n",base);
+	if(strcmp(inputBuffer,"a") == 0) {
+		listAll(base);
+		//       printf("%s\n",base);
+		send(sock,base,sizeof(base),0);
+	}
+
+	else if(inputBuffer[0] == 'd') {
+		getPid(pid,inputBuffer);
+		//printf("%s\n",pid);
+		//cleanValue(value);
+		openFile(fin,pid,buffer,inputBuffer[0],value);
+		printf("value=%s\n",value);
+		send(sock,value,sizeof(value),0);
+	}
+
+	else if(inputBuffer[0] == 'e') {
+		getPid(pid,inputBuffer);
+		openFile(fin,pid,buffer,inputBuffer[0],value);
+		printf("value=%s\n",value);
+		send(sock,value,sizeof(value),0);
+	}
+
+	else if(inputBuffer[0] == 'f') {
+		getCmdline(fin,value);
+		printf("value=%s\n",value);
+		send(sock,value,sizeof(value),0);
+	}
+
+	else if(inputBuffer[0] == 'g') {
+		getPid(pid,inputBuffer);
+		openFile(fin,pid,buffer,inputBuffer[0],value);
+		printf("value=%s\n",value);
+		send(sock,value,sizeof(value),0);
+	}
+
+	else if(inputBuffer[0] == 'i') {
+		getPid(pid,inputBuffer);
+		openFile(fin,pid,buffer,inputBuffer[0],value);
+		printf("value=%s\n",value);
+		send(sock,value,sizeof(value),0);
+	}
+
+	else if(inputBuffer[0] == 'j') {
+		getPid(pid,inputBuffer);
+		openFile(fin,pid,buffer,inputBuffer[0],value);
+		printf("value=%s\n",value);
+		send(sock,value,sizeof(value),0);
+	}
+	return;
+}

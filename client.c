@@ -90,6 +90,14 @@ int main(int argc, char **argv)
 			close(sockfd);
 		}
 
+		else if(work == 'f') {
+			sprintf(message,"%c",work);
+			send(sockfd,message,sizeof(message),0);
+			recv(sockfd,receivefromServer,sizeof(receivefromServer),0);
+			printf("[Cmdline of executing process] %s\n",receivefromServer);
+			close(sockfd);
+		}
+
 		else if(work == 'g') {
 			printf("pid?");
 			char pid[256];
@@ -127,6 +135,9 @@ int main(int argc, char **argv)
 			close(sockfd);
 
 		} else if(work == 'k') {
+			sprintf(message,"%s","Client Leave...");
+			send(sockfd,message,sizeof(message),0);
+			close(sockfd);
 			EXIT = 1;
 		}
 	}
