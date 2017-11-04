@@ -73,6 +73,19 @@ int main(int argc, char **argv)
 			close(sockfd);
 		}
 
+		else if(work == 'c') {
+			printf("pid?");
+			char pid[256];
+			sprintf(message,"%c",work);
+			gets(pid);
+			strcat(message,pid);
+			send(sockfd,message,sizeof(message),0);
+			recv(sockfd,receivefromServer,sizeof(receivefromServer),0);
+			//printf("haha\n");
+			printf("[Child's pid] %s\n",receivefromServer);
+			close(sockfd);
+		}
+
 		else if(work == 'd') {
 			printf("pid?");
 			char pid[256];

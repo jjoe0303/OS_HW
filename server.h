@@ -20,6 +20,8 @@ void getCmdline(FILE *fin,char value[]);
 void findAncient(FILE *fin,char pid[],char buffer[],char work,char value[],
                  char ppid[]);
 void openFile(FILE *fin,char pid[],char buffer[],char work,char value[]);
+void findChild(FILE *fin,char pid[],char buffer[],char work,char value[],
+               char base[]);
 void listAll(char base[]);
 void *pthread_handler(void *);
 

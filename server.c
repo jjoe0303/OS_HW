@@ -179,7 +179,44 @@ void openFile(FILE *fin, char pid[],char buffer[],char work,char value[])
 }
 
 
+void findChild(FILE *fin, char pid[],char buffer[],char work,char value[],
+               char base[])
+{
+	DIR * dir = opendir("/proc");
+	struct dirent *pidname;
+	int nonFirst=0;
+	memset(base,'\0',sizeof(base));
 
+	if((dir=opendir("/proc")) == NULL) {
+		perror("Open dir error...");
+		exit(1);
+	}
+
+	while((pidname=readdir(dir)) != NULL) {
+		if(strcmp(pidname->d_name,".")==0 || strcmp(pidname->d_name,"..")==0)
+			continue;
+		else if(pidname->d_type == 4 && isdigit(pidname->d_name[0])) {
+			//memset(base,'\0',sizeof(base));
+			openFile(fin,pidname->d_name,buffer,'g',value);
+			if(strcmp(value,pid) == 0) {
+				if(!nonFirst) {
+					sprintf(base,"%s",pidname->d_name);
+					nonFirst=1;
+				} else {
+					sprintf(base,"%s,%s",base,pidname->d_name);
+				}
+			}
+			memset(value,'\0',sizeof(value));
+			// printf("%s\n",base);
+		}
+	}
+	//	printf("%s\n",base);
+	closedir(dir);
+	return;
+
+
+
+}
 
 void listAll(char base[])
 {
@@ -242,6 +279,18 @@ void *pthread_handler(void *sockfd)
 		sprintf(value,"%lu",pthread_self());
 		printf("value=%s\n",value);
 		send(sock,value,sizeof(value),0);
+	}
+
+	else if(inputBuffer[0] == 'c') {
+		getPid(pid,inputBuffer);
+		findChild(fin,pid,buffer,inputBuffer[0],value,base);
+		if(strcmp(base,"") == 0) {
+			sprintf(base,"%s","Not found!!");
+		}
+
+		printf("value=%s\n",base);
+		send(sock,base,sizeof(base),0);
+
 	}
 
 	else if(inputBuffer[0] == 'd') {
