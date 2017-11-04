@@ -111,6 +111,25 @@ void getCmdline(FILE *fin,char value[])
 	return;
 }
 
+void findAncient(FILE *fin,char pid[],char buffer[],char work,char value[],
+                 char ppid[])
+{
+	int isFirst=1;
+	while(strcmp(pid,"0")!=0) {
+		openFile(fin,pid,buffer,'g',value);
+		//printf("ppid=%s\n",value);
+		if(isFirst) {
+			sprintf(ppid,"%s",value);
+		} else if(!isFirst) {
+			sprintf(ppid,"%s,%s",ppid,value);
+		}
+		memset(pid,'\0',sizeof(pid));
+		sprintf(pid,"%s",value);
+		memset(value,'\0',sizeof(value));
+		isFirst=0;
+	}
+}
+
 void openFile(FILE *fin, char pid[],char buffer[],char work,char value[])
 {
 	memset(buffer,'\0',sizeof(buffer));
@@ -192,9 +211,10 @@ void *pthread_handler(void *sockfd)
 {
 	int sock = *(int*)sockfd;
 	FILE *fin;
-	char buffer[100];
-	char value[100];
+	char buffer[256];
+	char value[256];
 	char pid[50];
+	char ppid[256];
 	char base[1000];
 	char inputBuffer[1000]= {};
 
@@ -203,6 +223,7 @@ void *pthread_handler(void *sockfd)
 	memset(buffer,'\0',sizeof(buffer));
 	memset(value,'\0',sizeof(value));
 	memset(pid,'\0',sizeof(pid));
+	memset(ppid,'\0',sizeof(ppid));
 	memset(base,'\0',sizeof(base));
 
 	//forClientSockfd = accept(sockfd,(struct sockaddr *)&clientinfo,&addrlen);
@@ -214,7 +235,7 @@ void *pthread_handler(void *sockfd)
 	//printf("%s\n",base);
 	if(strcmp(inputBuffer,"a") == 0) {
 		listAll(base);
-		send(sock,base,sizeof(base)-1,0);
+		send(sock,base,sizeof(base),0);
 	}
 
 	else if(inputBuffer[0] == 'b') {
@@ -251,6 +272,14 @@ void *pthread_handler(void *sockfd)
 		printf("value=%s\n",value);
 		send(sock,value,sizeof(value),0);
 	}
+
+	else if(inputBuffer[0] == 'h') {
+		getPid(pid,inputBuffer);
+		findAncient(fin,pid,buffer,inputBuffer[0],value,ppid);
+		printf("value=%s\n",ppid);
+		send(sock,ppid,sizeof(ppid),0);
+	}
+
 
 	else if(inputBuffer[0] == 'i') {
 		getPid(pid,inputBuffer);

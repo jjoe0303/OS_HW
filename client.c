@@ -118,6 +118,17 @@ int main(int argc, char **argv)
 			close(sockfd);
 		}
 
+		else if(work == 'h') {
+			printf("pid?");
+			char pid[256];
+			sprintf(message,"%c",work);
+			gets(pid);
+			strcat(message,pid);
+			send(sockfd,message,sizeof(message),0);
+			recv(sockfd,receivefromServer,sizeof(receivefromServer),0);
+			printf("[Ancients' PIDs] %s\n",receivefromServer);
+			close(sockfd);
+		}
 
 		else if(work == 'i') {
 			printf("pid?");

@@ -17,6 +17,8 @@
 void getPid(char pid[],char inputBuffer[]);
 void scanString(char buffer[],char value[]);
 void getCmdline(FILE *fin,char value[]);
+void findAncient(FILE *fin,char pid[],char buffer[],char work,char value[],
+                 char ppid[]);
 void openFile(FILE *fin,char pid[],char buffer[],char work,char value[]);
 void listAll(char base[]);
 void *pthread_handler(void *);
